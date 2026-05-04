@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DKC DİL - Görselli Oyun</title>
+    <title>DKC DİL</title>
     <style>
         * {
             box-sizing: border-box;
@@ -53,7 +53,6 @@
             text-shadow: 1px 1px 3px rgba(255,255,255,0.7);
         }
 
-        /* Tüm düşen objeler için temel stil ve dönme animasyonu */
         .falling-object {
             position: absolute;
             width: 80px;
@@ -71,16 +70,11 @@
             background-repeat: no-repeat;
         }
 
-        /* Standart kırmızı top KAlDIRILDI */
-
-        /* 50 Puanlık Top - Yazı kaldırıldı */
         .bonus-ball {
             background-image: url('50.png');
-            /* box-shadow kaldırıldı, görsel net olsun */
             animation: objectRotate 2s linear infinite;
         }
 
-        /* Özel İkonlar */
         .icon-en {
             background-image: url('english.png');
         }
@@ -89,7 +83,6 @@
             background-image: url('flag.png');
         }
 
-        /* ÖSYM Logosu çok az büyütüldü */
         .icon-osym {
             background-image: url('osym.png');
             width: 90px;
@@ -100,12 +93,10 @@
             background-image: url('united-states.png');
         }
 
-        /* Tıklama Hissiyatı - Titreme Animasyonu */
         .clicked-feel {
             animation: clickShake 0.15s ease-in-out !important;
         }
 
-        /* Animasyon Tanımları */
         @keyframes objectRotate {
             from { transform: translate(-50%, -50%) rotate(0deg); }
             to { transform: translate(-50%, -50%) rotate(360deg); }
@@ -118,7 +109,6 @@
             75% { transform: translate(-50%, -50%) scale(0.95) rotate(-3deg); }
         }
 
-        /* Ekranlar */
         #start-screen, #game-over-screen {
             position: absolute;
             top: 0;
@@ -155,7 +145,7 @@
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Yukarıdan düşen nesnelere tıklayın, 50 puanı kaçırmayın!</p>
+            <p>Çoklu düşen nesneleri hızlıca patlat!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -180,9 +170,8 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 5.5;
+        let gameSpeed = 7.5; // Hız artırıldı
 
-        // Nesne türleri (Kırmızı top kaldırıldı)
         const objectTypes = [
             { className: 'bonus-ball', points: 50 },
             { className: 'icon-en', points: 10 },
@@ -203,29 +192,36 @@
             gameObjects = [];
             score = 0;
             lives = 3;
-            gameSpeed = 5.5; 
+            gameSpeed = 7.5; 
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             isPlaying = true;
 
-            gameInterval = setInterval(updateGame, 15);
-            spawnInterval = setInterval(createObject, 600);
+            // Döngü hızları artırıldı (daha sık obje düşmesi için 300ms yapıldı)
+            gameInterval = setInterval(updateGame, 10);
+            spawnInterval = setInterval(createObject, 300); 
         }
 
         function createObject() {
             if (!isPlaying) return;
 
+            // Aynı anda ekranda daha çok çeşitlilik ve kalabalık olması için çiftli/tekli spawn kontrolü
+            createSingleObject();
+            // Bazen ikinci bir obje daha fırlat
+            if (Math.random() < 0.4) {
+                createSingleObject();
+            }
+        }
+
+        function createSingleObject() {
             const obj = document.createElement('div');
             obj.classList.add('falling-object');
 
-            // Rastgele bir nesne türü seçimi
             const randomIndex = Math.floor(Math.random() * objectTypes.length);
             const selectedType = objectTypes[randomIndex];
 
             obj.classList.add(selectedType.className);
             obj.dataset.points = selectedType.points;
-
-            // Yazı ekleme kısmı kaldırıldı
 
             const randomX = Math.random() * (gameContainer.clientWidth - 120) + 60;
             obj.style.left = `${randomX}px`;
@@ -244,14 +240,12 @@
         function handleObjectClick(obj) {
             if (!isPlaying) return;
 
-            // Tıklama hissi animasyonu
             obj.classList.add('clicked-feel');
 
             const pointsToAdd = parseInt(obj.dataset.points);
             score += pointsToAdd;
             scoreDisplay.textContent = score;
 
-            // Efekt bittikten sonra objeyi kaldır
             setTimeout(() => {
                 obj.style.animation = 'none'; 
                 obj.style.transition = 'transform 0.1s, opacity 0.1s';
@@ -262,17 +256,21 @@
                     obj.remove();
                 }, 100);
 
-                const index = gameObjects.indexOf(obj);
+                const index = gameObjectsFindIndex(obj);
                 if (index > -1) {
                     gameObjects.splice(index, 1);
                 }
 
-                // Hız artışı
                 if (score % 100 === 0) {
                     gameSpeed += 0.5;
                 }
             }, 150);
         }
+
+        // Dizi elemanını bulmak için yardımcı fonksiyon
+        functionObjectsFindIndex = function(obj) {
+            return gameObjects.indexOf(obj);
+        };
 
         function updateGame() {
             if (!isPlaying) return;
