@@ -55,19 +55,26 @@
             text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
+        /* Heart.png ve can rakamının yerleşimi */
         .lives-container {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
             pointer-events: auto;
         }
 
         .heart-icon {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             background-image: url('heart.png');
             background-size: cover;
             background-repeat: no-repeat;
+        }
+
+        #lives-count {
+            font-size: 36px;
+            color: #c0392b;
+            text-shadow: 1px 1px 3px #fff;
         }
 
         /* Düşen Kelime Kutusu */
@@ -87,9 +94,8 @@
             transform: translate(-50%, -50%); 
         }
 
-        /* AYNI RENK STİLİ: Hepsi aynı renk, oyuncu farkı anlayamaz */
         .neutral-word-style {
-            background-color: #34495e; /* Koyu gri tonu */
+            background-color: #34495e;
             color: #ffffff;
             border: 2px solid #2c3e50;
             text-shadow: 
@@ -143,14 +149,14 @@
         <div id="ui-panel">
             <div>Puan: <span id="score">0</span></div>
             <div class="lives-container">
-                KALAN CAN: <span id="lives-count">3</span>
                 <div class="heart-icon"></div>
+                <span id="lives-count">3</span>
             </div>
         </div>
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Pozitif kelimelere tıklayarak puan topla. Negatif kelimelere tıklama, kaçırma!</p>
+            <p>Pozitif kelimelere tıklayarak puan topla. Negatif kelimelere tıklama ve kaçırma!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -175,18 +181,18 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 2.92; // Önceki hız (2.5) %17 oranında hızlandırıldı.
+        let gameSpeed = 2.92;
         let spawnRate = 900; 
 
         const positiveWords = [
-            "Good", "Great", "Happy", "Yes", "Hello", "Like", "Positive" 
-            "Beautiful", "Nice", "Thank you", "Welcome", "Family", 
-            "Smile", "Fun", "New", "Hope", "Peace"
+            "Good", "Great", "Happy", "Yes", "Hello", "Friend", "Love", "Like", 
+            "Beautiful", "Nice", "Thank you", "Please", "Welcome", "Family", 
+            "Smile", "Fun", "New", "Sun", "Hope", "Peace"
         ];
 
         const negativeWords = [
             "Bad", "Sad", "No", "Hate", "Angry", "Cry", "Tired", "Sick", "Pain", 
-            "Fear", "Sorry", "Lost", "Late", "Bad luck", "Wrong", "Ugly", 
+            "Fear", "Sorry", "Lost", "Late", "Bad luck", "Wrong", "Ugly", "Cold", 
             "Boring", "Tired", "Difficult"
         ];
 
