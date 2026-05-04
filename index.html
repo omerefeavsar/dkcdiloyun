@@ -55,7 +55,6 @@
             text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
-        /* Heart.png ve can rakamının yerleşimi */
         .lives-container {
             display: flex;
             align-items: center;
@@ -184,15 +183,17 @@
         let gameSpeed = 2.92;
         let spawnRate = 900; 
 
+        // Güncellenmiş Pozitif Kelimeler ("Sun" çıkartıldı)
         const positiveWords = [
             "Good", "Great", "Happy", "Yes", "Hello", "Friend", "Love", "Like", 
             "Beautiful", "Nice", "Thank you", "Please", "Welcome", "Family", 
-            "Smile", "Fun", "New", "Sun", "Hope", "Peace"
+            "Smile", "Fun", "New", "Hope", "Peace"
         ];
 
+        // Güncellenmiş Negatif Kelimeler ("Cold" çıkartıldı)
         const negativeWords = [
             "Bad", "Sad", "No", "Hate", "Angry", "Cry", "Tired", "Sick", "Pain", 
-            "Fear", "Sorry", "Lost", "Late", "Bad luck", "Wrong", "Ugly", "Cold", 
+            "Fear", "Sorry", "Lost", "Late", "Bad luck", "Wrong", "Ugly", 
             "Boring", "Tired", "Difficult"
         ];
 
