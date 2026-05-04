@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>DKC DİL - Görselli Oyun</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #1a252f;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'Arial', sans-serif;
+            user-select: none;
+        }
+
+        #game-container {
+            width: 100vw;
+            height: 100vh;
+            max-width: 1024px;
+            max-height: 768px;
+            /* Arka plan görseli */
+            background-image: url('arkaplan.jpg');
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid #2c3e50;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+        }
+
+        #ui-panel {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            z-index: 10;
+            pointer-events: none;
+            text-shadow: 1px 1px 3px rgba(255,255,255,0.7);
+        }
+
+        /* Tüm düşen objeler için temel stil ve dönme animasyonu */
+        .falling-object {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            cursor: pointer;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform-origin: center center;
+            animation: objectRotate 4s linear infinite;
+            touch-action: manipulation;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* Standart kırmızı top KAlDIRILDI */
+
+        /* 50 Puanlık Top - Yazı kaldırıldı */
+        .bonus-ball {
+            background-image: url('50.png');
+            /* box-shadow kaldırıldı, görsel net olsun */
+            animation: objectRotate 2s linear infinite;
+        }
+
+        /* Özel İkonlar */
+        .icon-en {
+            background-image: url('english.png');
+        }
+        
+        .icon-flag {
+            background-image: url('flag.png');
+        }
+
+        /* ÖSYM Logosu çok az büyütüldü */
+        .icon-osym {
+            background-image: url('osym.png');
+            width: 90px;
+            height: 90px;
+        }
+
+        .icon-usa {
+            background-image: url('united-states.png');
+        }
+
+        /* Tıklama Hissiyatı - Titreme Animasyonu */
+        .clicked-feel {
+            animation: clickShake 0.15s ease-in-out !important;
+        }
+
+        /* Animasyon Tanımları */
+        @keyframes objectRotate {
+            from { transform: translate(-50%, -50%) rotate(0deg); }
+            to { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
+        @keyframes clickShake {
+            0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+            25% { transform: translate(-50%, -50%) scale(0.9) rotate(-5deg); }
+            50% { transform: translate(-50%, -50%) scale(1.1) rotate(5deg); }
+            75% { transform: translate(-50%, -50%) scale(0.95) rotate(-3deg); }
+        }
+
+        /* Ekranlar */
+        #start-screen, #game-over-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            z-index: 20;
+        }
+
+        h1 { font-size: 48px; margin: 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        p { font-size: 24px; margin: 10px 0 30px 0; }
+        button {
+            padding: 20px 40px; font-size: 24px; font-weight: bold; color: white;
+            background-color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 6px 10px rgba(0,0,0,0.3); transition: transform 0.1s, background-color 0.2s;
+        }
+        button:active { transform: scale(0.95); }
+        button:hover { background-color: #27ae60; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="ui-panel">
+            <div>Puan: <span id="score">0</span></div>
+            <div>Can: <span id="lives">3</span></div>
+        </div>
+
+        <div id="start-screen">
+            <h1 style="color: #3498db;">DKC DİL</h1>
+            <p>Yukarıdan düşen nesnelere tıklayın, 50 puanı kaçırmayın!</p>
+            <button onclick="startGame()">OYUNU BAŞLAT</button>
+        </div>
+
+        <div id="game-over-screen" style="display: none;">
+            <h1 style="color: #e74c3c;">OYUN BİTTİ!</h1>
+            <p>Toplam Puanınız: <span id="final-score">0</span></p>
+            <button onclick="startGame()">Yeniden Başla</button>
+        </div>
+    </div>
+
+    <script>
+        const gameContainer = document.getElementById('game-container');
+        const scoreDisplay = document.getElementById('score');
+        const livesDisplay = document.getElementById('lives');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+
+        let score = 0;
+        let lives = 3;
+        let gameObjects = [];
+        let gameInterval;
+        let spawnInterval;
+        let isPlaying = false;
+        let gameSpeed = 5.5;
+
+        // Nesne türleri (Kırmızı top kaldırıldı)
+        const objectTypes = [
+            { className: 'bonus-ball', points: 50 },
+            { className: 'icon-en', points: 10 },
+            { className: 'icon-flag', points: 10 },
+            { className: 'icon-osym', points: 10 },
+            { className: 'icon-usa', points: 10 }
+        ];
+
+        function startGame() {
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+
+            startScreen.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            
+            document.querySelectorAll('.falling-object').forEach(obj => obj.remove());
+            
+            gameObjects = [];
+            score = 0;
+            lives = 3;
+            gameSpeed = 5.5; 
+            scoreDisplay.textContent = score;
+            livesDisplay.textContent = lives;
+            isPlaying = true;
+
+            gameInterval = setInterval(updateGame, 15);
+            spawnInterval = setInterval(createObject, 600);
+        }
+
+        function createObject() {
+            if (!isPlaying) return;
+
+            const obj = document.createElement('div');
+            obj.classList.add('falling-object');
+
+            // Rastgele bir nesne türü seçimi
+            const randomIndex = Math.floor(Math.random() * objectTypes.length);
+            const selectedType = objectTypes[randomIndex];
+
+            obj.classList.add(selectedType.className);
+            obj.dataset.points = selectedType.points;
+
+            // Yazı ekleme kısmı kaldırıldı
+
+            const randomX = Math.random() * (gameContainer.clientWidth - 120) + 60;
+            obj.style.left = `${randomX}px`;
+            obj.style.top = '-80px';
+            obj.y = -80;
+
+            obj.addEventListener('pointerdown', (e) => {
+                e.preventDefault();
+                handleObjectClick(obj);
+            });
+
+            gameContainer.appendChild(obj);
+            gameObjects.push(obj);
+        }
+
+        function handleObjectClick(obj) {
+            if (!isPlaying) return;
+
+            // Tıklama hissi animasyonu
+            obj.classList.add('clicked-feel');
+
+            const pointsToAdd = parseInt(obj.dataset.points);
+            score += pointsToAdd;
+            scoreDisplay.textContent = score;
+
+            // Efekt bittikten sonra objeyi kaldır
+            setTimeout(() => {
+                obj.style.animation = 'none'; 
+                obj.style.transition = 'transform 0.1s, opacity 0.1s';
+                obj.style.transform = 'translate(-50%, -50%) scale(1.6)';
+                obj.style.opacity = '0';
+
+                setTimeout(() => {
+                    obj.remove();
+                }, 100);
+
+                const index = gameObjects.indexOf(obj);
+                if (index > -1) {
+                    gameObjects.splice(index, 1);
+                }
+
+                // Hız artışı
+                if (score % 100 === 0) {
+                    gameSpeed += 0.5;
+                }
+            }, 150);
+        }
+
+        function updateGame() {
+            if (!isPlaying) return;
+
+            for (let i = gameObjects.length - 1; i >= 0; i--) {
+                const obj = gameObjects[i];
+                obj.y += gameSpeed;
+                obj.style.top = `${obj.y}px`;
+
+                if (obj.y > gameContainer.clientHeight + 60) {
+                    obj.remove();
+                    gameObjects.splice(i, 1);
+                    lives--;
+                    livesDisplay.textContent = lives;
+
+                    if (lives <= 0) {
+                        endGame();
+                    }
+                }
+            }
+        }
+
+        function endGame() {
+            isPlaying = false;
+            clearInterval(gameInterval);
+            clearInterval(spawnInterval);
+
+            document.querySelectorAll('.falling-object').forEach(obj => obj.remove());
+            gameObjects = [];
+
+            finalScoreDisplay.textContent = score;
+            gameOverScreen.style.display = 'flex';
+        }
+    </script>
+</body>
+</html>
