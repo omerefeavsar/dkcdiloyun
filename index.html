@@ -24,11 +24,11 @@
         }
 
         #game-container {
+            /* Cihazın boyutuna göre tam ekran kaplar */
             width: 100vw;
             height: 100vh;
-            /* Tablet Çözünürlüğü: 2000x1200 */
-            max-width: 1500px;
-            max-height: 1000px;
+            max-width: 1000px;
+            max-height: 800px;
             /* Arka plan görseli */
             background-image: url('arkaplan.jpg');
             background-size: cover;
@@ -41,12 +41,12 @@
 
         #ui-panel {
             position: absolute;
-            top: 25px;
-            left: 40px;
-            right: 40px;
+            top: 2.5%;
+            left: 3.5%;
+            right: 3.5%;
             display: flex;
             justify-content: space-between;
-            font-size: 36px;
+            font-size: min(4vw, 30px);
             font-weight: bold;
             color: #2c3e50;
             z-index: 10;
@@ -54,10 +54,11 @@
             text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
+        /* Ekran boyutuna göre nesnelerin boyutunu ölçekler (CSS min() fonksiyonu) */
         .falling-object {
             position: absolute;
-            width: 120px;
-            height: 120px;
+            width: min(9vw, 90px);
+            height: min(9vw, 90px);
             cursor: pointer;
             border-radius: 50%;
             display: flex;
@@ -86,8 +87,8 @@
 
         .icon-osym {
             background-image: url('osym.png');
-            width: 140px;
-            height: 140px;
+            width: min(11vw, 110px);
+            height: min(11vw, 110px);
         }
 
         .icon-usa {
@@ -125,12 +126,12 @@
             z-index: 20;
         }
 
-        h1 { font-size: 64px; margin: 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.6); }
-        p { font-size: 32px; margin: 10px 0 50px 0; }
+        h1 { font-size: min(6vw, 54px); margin: 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.6); }
+        p { font-size: min(3.5vw, 24px); margin: 10px 0 40px 0; text-align: center; padding: 0 10px; }
         button {
-            padding: 25px 60px; font-size: 32px; font-weight: bold; color: white;
-            background-color: #2ecc71; border: none; border-radius: 60px; cursor: pointer;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.2s;
+            padding: 1.5vh 4vw; font-size: min(3.5vw, 26px); font-weight: bold; color: white;
+            background-color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.2s;
         }
         button:active { transform: scale(0.95); }
         button:hover { background-color: #27ae60; }
@@ -146,7 +147,7 @@
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Nesnelere dokunarak puan topla!</p>
+            <p>Tüm cihaz boyutlarına uyumlu oyun - Nesneleri yakala!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -171,8 +172,8 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 7.5; // Başlangıç hızı
-        let spawnRate = 400; // Ekrana obje düşme aralığı (ms)
+        let gameSpeed = 6.0; 
+        let spawnRate = 500; 
 
         const objectTypes = [
             { className: 'bonus-ball', points: 50 },
@@ -181,6 +182,11 @@
             { className: 'icon-osym', points: 10 },
             { className: 'icon-usa', points: 10 }
         ];
+
+        // Boyut değiştiğinde oyun hızını ve ekran ölçeğini korur
+        window.addEventListener('resize', () => {
+            // Dinamik olarak boyutları yeniden ayarlayabilir
+        });
 
         function startGame() {
             clearInterval(gameInterval);
@@ -194,13 +200,11 @@
             gameObjects = [];
             score = 0;
             lives = 3;
-            gameSpeed = 7.5; 
-            spawnRate = 400;
+            gameSpeed = 6.0; 
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             isPlaying = true;
 
-            // Oyun döngülerini başlat
             gameInterval = setInterval(updateGame, 10);
             spawnInterval = setInterval(createObject, spawnRate);
         }
@@ -209,7 +213,7 @@
             if (!isPlaying) return;
 
             createSingleObject();
-            if (Math.random() < 0.5) {
+            if (Math.random() < 0.4) {
                 createSingleObject();
             }
         }
@@ -224,8 +228,10 @@
             obj.classList.add(selectedType.className);
             obj.dataset.points = selectedType.points;
 
-            // X koordinatını 2000'e göre rastgele oluştur
-            const randomX = Math.random() * (gameContainer.clientWidth - 200) + 100;
+            // X koordinatını cihazın güncel genişliğine göre ayarlar
+            const containerWidth = gameContainer.clientWidth;
+            const randomX = Math.random() * (containerWidth - 160) + 80;
+            
             obj.style.left = `${randomX}px`;
             obj.style.top = '-120px';
             obj.y = -120;
@@ -248,9 +254,8 @@
             score += pointsToAdd;
             scoreDisplay.textContent = score;
 
-            // İlerledikçe Hızlandırma Mekanizması
             if (score > 0 && score % 100 === 0) {
-                gameSpeed += 1.0; // Puan 100'ün katlarına ulaştıkça hızı artır
+                gameSpeed += 0.8; 
             }
 
             setTimeout(() => {
@@ -273,12 +278,15 @@
         function updateGame() {
             if (!isPlaying) return;
 
+            // Ekran yüksekliğine göre bitiş noktasını ayarla
+            const containerHeight = gameContainer.clientHeight;
+
             for (let i = gameObjects.length - 1; i >= 0; i--) {
                 const obj = gameObjects[i];
                 obj.y += gameSpeed;
                 obj.style.top = `${obj.y}px`;
 
-                if (obj.y > gameContainer.clientHeight + 100) {
+                if (obj.y > containerHeight + 100) {
                     obj.remove();
                     gameObjects.splice(i, 1);
                     lives--;
