@@ -26,37 +26,38 @@
         #game-container {
             width: 100vw;
             height: 100vh;
-            max-width: 1024px;
-            max-height: 768px;
+            /* Tablet Çözünürlüğü: 2000x1200 */
+            max-width: 2000px;
+            max-height: 1200px;
             /* Arka plan görseli */
             background-image: url('arkaplan.jpg');
             background-size: cover;
             background-position: center;
             position: relative;
             overflow: hidden;
-            border: 2px solid #2c3e50;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+            border: 4px solid #2c3e50;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.7);
         }
 
         #ui-panel {
             position: absolute;
-            top: 15px;
-            left: 20px;
-            right: 20px;
+            top: 25px;
+            left: 40px;
+            right: 40px;
             display: flex;
             justify-content: space-between;
-            font-size: 28px;
+            font-size: 36px;
             font-weight: bold;
             color: #2c3e50;
             z-index: 10;
             pointer-events: none;
-            text-shadow: 1px 1px 3px rgba(255,255,255,0.7);
+            text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
         .falling-object {
             position: absolute;
-            width: 80px;
-            height: 80px;
+            width: 120px;
+            height: 120px;
             cursor: pointer;
             border-radius: 50%;
             display: flex;
@@ -85,8 +86,8 @@
 
         .icon-osym {
             background-image: url('osym.png');
-            width: 90px;
-            height: 90px;
+            width: 140px;
+            height: 140px;
         }
 
         .icon-usa {
@@ -124,12 +125,12 @@
             z-index: 20;
         }
 
-        h1 { font-size: 48px; margin: 10px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        p { font-size: 24px; margin: 10px 0 30px 0; }
+        h1 { font-size: 64px; margin: 20px 0; text-shadow: 3px 3px 6px rgba(0,0,0,0.6); }
+        p { font-size: 32px; margin: 10px 0 50px 0; }
         button {
-            padding: 20px 40px; font-size: 24px; font-weight: bold; color: white;
-            background-color: #2ecc71; border: none; border-radius: 50px; cursor: pointer;
-            box-shadow: 0 6px 10px rgba(0,0,0,0.3); transition: transform 0.1s, background-color 0.2s;
+            padding: 25px 60px; font-size: 32px; font-weight: bold; color: white;
+            background-color: #2ecc71; border: none; border-radius: 60px; cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4); transition: transform 0.1s, background-color 0.2s;
         }
         button:active { transform: scale(0.95); }
         button:hover { background-color: #27ae60; }
@@ -145,7 +146,7 @@
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Çoklu düşen nesneleri hızlıca patlat!</p>
+            <p>Çözünürlük 2000x1200 - Hızlanarak düşen nesneleri yakala!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -170,7 +171,8 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 7.5; // Hız artırıldı
+        let gameSpeed = 7.5; // Başlangıç hızı
+        let spawnRate = 400; // Ekrana obje düşme aralığı (ms)
 
         const objectTypes = [
             { className: 'bonus-ball', points: 50 },
@@ -193,22 +195,21 @@
             score = 0;
             lives = 3;
             gameSpeed = 7.5; 
+            spawnRate = 400;
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             isPlaying = true;
 
-            // Döngü hızları artırıldı (daha sık obje düşmesi için 300ms yapıldı)
+            // Oyun döngülerini başlat
             gameInterval = setInterval(updateGame, 10);
-            spawnInterval = setInterval(createObject, 300); 
+            spawnInterval = setInterval(createObject, spawnRate);
         }
 
         function createObject() {
             if (!isPlaying) return;
 
-            // Aynı anda ekranda daha çok çeşitlilik ve kalabalık olması için çiftli/tekli spawn kontrolü
             createSingleObject();
-            // Bazen ikinci bir obje daha fırlat
-            if (Math.random() < 0.4) {
+            if (Math.random() < 0.5) {
                 createSingleObject();
             }
         }
@@ -223,10 +224,11 @@
             obj.classList.add(selectedType.className);
             obj.dataset.points = selectedType.points;
 
-            const randomX = Math.random() * (gameContainer.clientWidth - 120) + 60;
+            // X koordinatını 2000'e göre rastgele oluştur
+            const randomX = Math.random() * (gameContainer.clientWidth - 200) + 100;
             obj.style.left = `${randomX}px`;
-            obj.style.top = '-80px';
-            obj.y = -80;
+            obj.style.top = '-120px';
+            obj.y = -120;
 
             obj.addEventListener('pointerdown', (e) => {
                 e.preventDefault();
@@ -246,6 +248,11 @@
             score += pointsToAdd;
             scoreDisplay.textContent = score;
 
+            // İlerledikçe Hızlandırma Mekanizması
+            if (score > 0 && score % 100 === 0) {
+                gameSpeed += 1.0; // Puan 100'ün katlarına ulaştıkça hızı artır
+            }
+
             setTimeout(() => {
                 obj.style.animation = 'none'; 
                 obj.style.transition = 'transform 0.1s, opacity 0.1s';
@@ -256,21 +263,12 @@
                     obj.remove();
                 }, 100);
 
-                const index = gameObjectsFindIndex(obj);
+                const index = gameObjects.indexOf(obj);
                 if (index > -1) {
                     gameObjects.splice(index, 1);
                 }
-
-                if (score % 100 === 0) {
-                    gameSpeed += 0.5;
-                }
             }, 150);
         }
-
-        // Dizi elemanını bulmak için yardımcı fonksiyon
-        functionObjectsFindIndex = function(obj) {
-            return gameObjects.indexOf(obj);
-        };
 
         function updateGame() {
             if (!isPlaying) return;
@@ -280,7 +278,7 @@
                 obj.y += gameSpeed;
                 obj.style.top = `${obj.y}px`;
 
-                if (obj.y > gameContainer.clientHeight + 60) {
+                if (obj.y > gameContainer.clientHeight + 100) {
                     obj.remove();
                     gameObjects.splice(i, 1);
                     lives--;
