@@ -84,28 +84,14 @@
             touch-action: manipulation;
             font-weight: bold;
             font-size: min(2.5vw, 24px);
-            /* Yazıların dönmemesi için transform sıfırlandı */
             transform: translate(-50%, -50%); 
         }
 
-        /* Pozitif Kelime Stili (Yeşil Tonları) */
-        .positive-word {
-            background-color: #2ecc71;
-            color: white;
-            border: 2px solid #27ae60;
-            /* Siyah yazıya beyaz kontür efekti */
-            text-shadow: 
-                -1px -1px 0 #000,  
-                 1px -1px 0 #000,
-                -1px  1px 0 #000,
-                 1px  1px 0 #000;
-        }
-
-        /* Negatif Kelime Stili (Kırmızı Tonları) */
-        .negative-word {
-            background-color: #e74c3c;
-            color: white;
-            border: 2px solid #c0392b;
+        /* AYNI RENK STİLİ: Hepsi aynı renk, oyuncu farkı anlayamaz */
+        .neutral-word-style {
+            background-color: #34495e; /* Koyu gri tonu */
+            color: #ffffff;
+            border: 2px solid #2c3e50;
             text-shadow: 
                 -1px -1px 0 #000,  
                  1px -1px 0 #000,
@@ -157,14 +143,14 @@
         <div id="ui-panel">
             <div>Puan: <span id="score">0</span></div>
             <div class="lives-container">
-                Can: <span id="lives-count">3</span>
+                KALAN CAN: <span id="lives-count">3</span>
                 <div class="heart-icon"></div>
             </div>
         </div>
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Yeşil kelimelere tıklayarak puan topla. Kırmızı kelimelere tıklama ve kaçırma!</p>
+            <p>Pozitif kelimelere tıklayarak puan topla. Negatif kelimelere tıklama, kaçırma!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -189,10 +175,9 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 2.5; // Yavaşlatılmış oyun hızı
+        let gameSpeed = 2.92; // Önceki hız (2.5) %17 oranında hızlandırıldı.
         let spawnRate = 900; 
 
-        // Pozitif ve negatif kelime listeleri
         const positiveWords = [
             "Good", "Great", "Happy", "Yes", "Hello", "Friend", "Love", "Like", 
             "Beautiful", "Nice", "Thank you", "Please", "Welcome", "Family", 
@@ -217,7 +202,7 @@
             gameObjects = [];
             score = 0;
             lives = 3;
-            gameSpeed = 2.5; 
+            gameSpeed = 2.92; 
             scoreDisplay.textContent = score;
             livesCountDisplay.textContent = lives;
             isPlaying = true;
@@ -229,7 +214,6 @@
         function createWordObject() {
             if (!isPlaying) return;
 
-            // %50 Pozitif, %50 Negatif kelime ihtimali
             const isPositive = Math.random() < 0.5;
             let wordText = "";
             let isPositiveWordType = false;
@@ -243,21 +227,18 @@
             }
 
             const obj = document.createElement('div');
-            obj.classList.add('falling-word-object');
+            obj.classList.add('falling-word-object', 'neutral-word-style');
             obj.textContent = wordText;
 
             if (isPositiveWordType) {
-                obj.classList.add('positive-word');
                 obj.dataset.type = 'positive';
                 obj.dataset.points = '10';
             } else {
-                obj.classList.add('negative-word');
                 obj.dataset.type = 'negative';
-                obj.dataset.points = '0'; // Negatif kelimeye tıklanırsa puan yok
+                obj.dataset.points = '0';
             }
 
             const containerWidth = gameContainer.clientWidth;
-            // Kelimelerin dışarı taşmaması için kenarlardan pay bırakılır
             const randomX = Math.random() * (containerWidth - 200) + 100;
             
             obj.style.left = `${randomX}px`;
@@ -277,7 +258,6 @@
             if (!isPlaying) return;
 
             obj.classList.add('clicked-feel');
-
             const type = obj.dataset.type;
 
             if (type === 'positive') {
@@ -285,7 +265,6 @@
                 score += pointsToAdd;
                 scoreDisplay.textContent = score;
             } else {
-                // Negatif kelimeye tıklanırsa can kaybı yaşanır
                 lives--;
                 livesCountDisplay.textContent = lives;
                 if (lives <= 0) {
@@ -294,7 +273,6 @@
                 }
             }
 
-            // Yok etme animasyonu
             setTimeout(() => {
                 obj.style.transition = 'transform 0.1s, opacity 0.1s';
                 obj.style.transform = 'translate(-50%, -50%) scale(1.6)';
@@ -325,12 +303,10 @@
                 obj.y += gameSpeed;
                 obj.style.top = `${obj.y}px`;
 
-                // Ekrandan kaçan nesneler kontrolü
                 if (obj.y > containerHeight + 60) {
                     const type = obj.dataset.type;
                     
                     if (type === 'positive') {
-                        // Olumlu kelime kaçırılırsa can azalır
                         lives--;
                         livesCountDisplay.textContent = lives;
                     } 
