@@ -12,7 +12,8 @@
         body {
             margin: 0;
             padding: 0;
-            background-color: #1a252f;
+            /* Beyaz arka plan ile boşlukları doldurma */
+            background-color: #ffffff;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -30,8 +31,10 @@
             max-height: 800px;
             /* Arka plan görseli */
             background-image: url('arkaplan.jpg');
-            background-size: cover;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
+            background-color: #ffffff; /* Beyaz dolgu */
             position: relative;
             overflow: hidden;
             border: 4px solid #2c3e50;
@@ -145,7 +148,7 @@
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Hız dengesi ayarlandı - Nesneleri yakala!</p>
+            <p>Hızlandırılmış DKC DİL oyunu yüklenmiştir - Oynamak için Başlat'a basın.</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -170,16 +173,8 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 8; // Başlangıç hızı daha ortalama bir seviyeye çekildi
-        let spawnRate = 700; // Nesnelerin geliş aralığı biraz rahatlatıldı
-
-        const objectTypes = [
-            { className: 'bonus-ball', points: 50 },
-            { className: 'icon-en', points: 10 },
-            { className: 'icon-flag', points: 10 },
-            { className: 'icon-osym', points: 10 },
-            { className: 'icon-usa', points: 10 }
-        ];
+        let gameSpeed = 5.0; // Ortalama başlangıç hızı
+        let spawnRate = 600; 
 
         function startGame() {
             clearInterval(gameInterval);
@@ -193,7 +188,7 @@
             gameObjects = [];
             score = 0;
             lives = 3;
-            gameSpeed = 3.5; // Başlangıç hızı
+            gameSpeed = 5.0; 
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             isPlaying = true;
@@ -207,7 +202,7 @@
 
             createSingleObject();
             if (Math.random() < 0.3) {
-                createSingleObject(); // Bazen ikinci bir obje düşer
+                createSingleObject(); 
             }
         }
 
@@ -215,11 +210,19 @@
             const obj = document.createElement('div');
             obj.classList.add('falling-object');
 
-            const randomIndex = Math.floor(Math.random() * objectTypes.length);
-            const selectedType = objectTypes[randomIndex];
+            // 50 puanlık bonus topuna %22.5 şans verme kontrolü
+            const isBonus = Math.random() < 0.225;
 
-            obj.classList.add(selectedType.className);
-            obj.dataset.points = selectedType.points;
+            if (isBonus) {
+                obj.classList.add('bonus-ball');
+                obj.dataset.points = '50';
+            } else {
+                // Sözlük ve bayraklardan rastgele seç
+                const otherIcons = ['icon-en', 'icon-flag', 'icon-osym', 'icon-usa'];
+                const randomIcon = otherIcons[Math.floor(Math.random() * otherIcons.length)];
+                obj.classList.add(randomIcon);
+                obj.dataset.points = '10';
+            }
 
             const containerWidth = gameContainer.clientWidth;
             const randomX = Math.random() * (containerWidth - 160) + 80;
@@ -246,9 +249,9 @@
             score += pointsToAdd;
             scoreDisplay.textContent = score;
 
-            // İlerledikçe hafif hız artışı
+            // Puan arttıkça daha da hızlandır
             if (score > 0 && score % 100 === 0) {
-                gameSpeed += 0.5; 
+                gameSpeed += 0.8; 
             }
 
             setTimeout(() => {
