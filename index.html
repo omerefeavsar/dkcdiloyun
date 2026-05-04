@@ -24,7 +24,6 @@
         }
 
         #game-container {
-            /* Cihazın boyutuna göre tam ekran kaplar */
             width: 100vw;
             height: 100vh;
             max-width: 1000px;
@@ -54,7 +53,6 @@
             text-shadow: 1px 1px 4px rgba(255,255,255,0.8);
         }
 
-        /* Ekran boyutuna göre nesnelerin boyutunu ölçekler (CSS min() fonksiyonu) */
         .falling-object {
             position: absolute;
             width: min(9vw, 90px);
@@ -147,7 +145,7 @@
 
         <div id="start-screen">
             <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Tüm cihaz boyutlarına uyumlu oyun - Nesneleri yakala!</p>
+            <p>Hız dengesi ayarlandı - Nesneleri yakala!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -172,8 +170,8 @@
         let gameInterval;
         let spawnInterval;
         let isPlaying = false;
-        let gameSpeed = 6.0; 
-        let spawnRate = 500; 
+        let gameSpeed = 3.5; // Başlangıç hızı daha ortalama bir seviyeye çekildi
+        let spawnRate = 700; // Nesnelerin geliş aralığı biraz rahatlatıldı
 
         const objectTypes = [
             { className: 'bonus-ball', points: 50 },
@@ -182,11 +180,6 @@
             { className: 'icon-osym', points: 10 },
             { className: 'icon-usa', points: 10 }
         ];
-
-        // Boyut değiştiğinde oyun hızını ve ekran ölçeğini korur
-        window.addEventListener('resize', () => {
-            // Dinamik olarak boyutları yeniden ayarlayabilir
-        });
 
         function startGame() {
             clearInterval(gameInterval);
@@ -200,12 +193,12 @@
             gameObjects = [];
             score = 0;
             lives = 3;
-            gameSpeed = 6.0; 
+            gameSpeed = 3.5; // Başlangıç hızı
             scoreDisplay.textContent = score;
             livesDisplay.textContent = lives;
             isPlaying = true;
 
-            gameInterval = setInterval(updateGame, 10);
+            gameInterval = setInterval(updateGame, 15);
             spawnInterval = setInterval(createObject, spawnRate);
         }
 
@@ -213,8 +206,8 @@
             if (!isPlaying) return;
 
             createSingleObject();
-            if (Math.random() < 0.4) {
-                createSingleObject();
+            if (Math.random() < 0.3) {
+                createSingleObject(); // Bazen ikinci bir obje düşer
             }
         }
 
@@ -228,7 +221,6 @@
             obj.classList.add(selectedType.className);
             obj.dataset.points = selectedType.points;
 
-            // X koordinatını cihazın güncel genişliğine göre ayarlar
             const containerWidth = gameContainer.clientWidth;
             const randomX = Math.random() * (containerWidth - 160) + 80;
             
@@ -254,8 +246,9 @@
             score += pointsToAdd;
             scoreDisplay.textContent = score;
 
+            // İlerledikçe hafif hız artışı
             if (score > 0 && score % 100 === 0) {
-                gameSpeed += 0.8; 
+                gameSpeed += 0.5; 
             }
 
             setTimeout(() => {
@@ -278,7 +271,6 @@
         function updateGame() {
             if (!isPlaying) return;
 
-            // Ekran yüksekliğine göre bitiş noktasını ayarla
             const containerHeight = gameContainer.clientHeight;
 
             for (let i = gameObjects.length - 1; i >= 0; i--) {
