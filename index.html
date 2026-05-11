@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>DKC DİL</title>
+    <title>YADİKU</title>
     <style>
         * {
             box-sizing: border-box;
@@ -154,8 +154,8 @@
         </div>
 
         <div id="start-screen">
-            <h1 style="color: #3498db;">DKC DİL</h1>
-            <p>Pozitif kelimelere tıklayarak puan topla. Negatif kelimelere tıklama ve kaçırma!</p>
+            <h1 style="color: #ffff03;">YADİKU</h1>
+            <p>Pozitif kelimelere tıklayarak puan topla. Negatif kelimelere tıklama ve pozitifleri kaçırma!</p>
             <button onclick="startGame()">OYUNU BAŞLAT</button>
         </div>
 
@@ -183,17 +183,22 @@
         let gameSpeed = 2.92;
         let spawnRate = 900; 
 
-        // Güncellenmiş Pozitif Kelimeler ("Love" ve "Friend" çıkartıldı)
+        // Güncellenmiş Pozitif Kelimeler (Eskiler + Yeniler eklendi)
         const positiveWords = [
             "Good", "Great", "Happy", "Yes", "Hello", "Like", 
             "Beautiful", "Nice", "Thank you", "Please", "Welcome", "Family", 
-            "Smile", "Fun", "New", "Hope", "Peace"
+            "Smile", "Fun", "New", "Hope", "Peace",
+            "Kind", "Brave", "Smart", "Friendly", "Calm", 
+            "Creative", "Helpful", "Successful", "Honest", "Polite"
         ];
 
+        // Güncellenmiş Negatif Kelimeler (Eskiler + Yeniler eklendi)
         const negativeWords = [
             "Bad", "Sad", "No", "Hate", "Angry", "Cry", "Tired", "Sick", "Pain", 
             "Fear", "Sorry", "Lost", "Late", "Bad luck", "Wrong", "Ugly", 
-            "Boring", "Tired", "Difficult"
+            "Boring", "Difficult",
+            "Rude", "Lazy", "Mean", "Anxious", "Upset", 
+            "Selfish", "Messy", "Shy", "Weak"
         ];
 
         function startGame() {
@@ -293,7 +298,8 @@
                     gameObjects.splice(index, 1);
                 }
 
-                if (score > 0 && score % 100 === 0) {
+                // Hızlanma mantığı: Her 50 puanda bir hızlanır
+                if (score > 0 && score % 50 === 0) {
                     gameSpeed += 0.5;
                 }
             }, 100);
